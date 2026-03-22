@@ -1,0 +1,165 @@
+.card {
+  width: 62px;
+  height: 90px;
+  border-radius: 8px;
+  background: var(--cream);
+  border: 1px solid #ddd;
+  box-shadow: 1px 2px 6px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4px 5px;
+  cursor: default;
+  position: relative;
+  transition: transform 0.15s, box-shadow 0.15s;
+  flex-shrink: 0;
+}
+
+.card.playable {
+  cursor: pointer;
+  box-shadow: 0 0 0 2px var(--gold), 0 4px 12px rgba(255, 215, 0, 0.4);
+}
+.card.playable:hover {
+  transform: translateY(-14px) scale(1.05);
+  box-shadow: 0 0 0 3px var(--gold), 0 10px 20px rgba(255, 215, 0, 0.5);
+  z-index: 10;
+}
+
+.card.selected {
+  transform: translateY(-18px);
+  box-shadow: 0 0 0 3px #4ade80, 0 10px 20px rgba(74, 222, 128, 0.5);
+}
+
+.card.back {
+  background: repeating-linear-gradient(
+    45deg,
+    #1a3a6e,
+    #1a3a6e 4px,
+    #112855 4px,
+    #112855 8px
+  );
+  cursor: default;
+  border: 1px solid #0d1f42;
+}
+.card.back::after {
+  content: '♠';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: rgba(255,255,255,0.1);
+}
+
+.card-corner-top, .card-corner-bot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  font-weight: 800;
+}
+.card-corner-bot { transform: rotate(180deg); }
+
+.card-rank { font-size: 14px; }
+.card-suit-small { font-size: 11px; }
+
+.card-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex: 1;
+}
+
+.card.suit-hearts .card-rank,
+.card.suit-hearts .card-suit-small,
+.card.suit-hearts .card-center,
+.card.suit-diamonds .card-rank,
+.card.suit-diamonds .card-suit-small,
+.card.suit-diamonds .card-center {
+  color: var(--red);
+}
+.card.suit-spades .card-rank,
+.card.suit-spades .card-suit-small,
+.card.suit-spades .card-center,
+.card.suit-clubs .card-rank,
+.card.suit-clubs .card-suit-small,
+.card.suit-clubs .card-center {
+  color: #111;
+}
+
+/* North/South hand - horizontal */
+.player-north .card,
+.player-south .card {
+  margin-left: -14px;
+}
+.player-north .card:first-child,
+.player-south .card:first-child {
+  margin-left: 0;
+}
+.player-north .card {
+  width: 44px;
+  height: 64px;
+  border-radius: 5px;
+}
+.player-north .card-center,
+.player-north .card-corner-bot { display: none; }
+.player-north .card-rank { font-size: 11px; }
+.player-north .card-suit-small { font-size: 9px; }
+
+/* West/East - small stacked cards */
+.player-west .card,
+.player-east .card {
+  width: 40px;
+  height: 58px;
+  border-radius: 4px;
+  margin-top: -44px;
+  padding: 3px;
+}
+.player-west .card:first-child,
+.player-east .card:first-child { margin-top: 0; }
+.player-west .card-center,
+.player-west .card-corner-bot,
+.player-east .card-center,
+.player-east .card-corner-bot { display: none; }
+.player-west .card-rank,
+.player-east .card-rank { font-size: 10px; }
+.player-west .card-suit-small,
+.player-east .card-suit-small { font-size: 8px; }
+
+/* Trick area cards */
+.trick-slot .card {
+  width: 58px;
+  height: 82px;
+  margin: 0;
+  cursor: default !important;
+  transform: none !important;
+  box-shadow: 2px 3px 8px rgba(0,0,0,0.6) !important;
+}
+
+/* Bury panel cards */
+.bury-card-wrap { position: relative; cursor: pointer; }
+.bury-card-wrap.selected-bury .card {
+  box-shadow: 0 0 0 3px #f87171, 0 4px 12px rgba(248,113,113,0.4);
+  transform: translateY(-6px);
+}
+.bury-card-wrap .card {
+  width: 58px;
+  height: 82px;
+}
+
+/* Card appear animation */
+@keyframes cardDeal {
+  from { transform: scale(0) rotate(-10deg); opacity: 0; }
+  to { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.card-deal-anim { animation: cardDeal 0.2s ease-out; }
+
+/* Trick win animation */
+@keyframes trickCollect {
+  to { transform: scale(0); opacity: 0; }
+}
+.card-collect-anim { animation: trickCollect 0.4s ease-in forwards; }

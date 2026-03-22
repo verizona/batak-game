@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batak - Oyun</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/table.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/hud.css">
+</head>
+<body class="game-body">
+
+  <!-- TOP BAR -->
+  <div id="top-bar">
+    <div class="top-left">
+      <button class="btn-icon-only" onclick="leaveGame()" title="Çık">‹</button>
+      <span id="mode-label" class="mode-badge">İhaleli</span>
+      <span id="round-label" class="round-badge">El 1/4</span>
+    </div>
+    <div class="top-center">
+      <span id="trump-display" class="trump-info" style="display:none"></span>
+      <span id="contract-display" class="contract-info" style="display:none"></span>
+    </div>
+    <div class="top-right">
+      <button class="btn-icon-only" onclick="toggleChat()" title="Sohbet">💬</button>
+    </div>
+  </div>
+
+  <!-- GAME TABLE -->
+  <div id="game-table">
+
+    <!-- NORTH PLAYER -->
+    <div id="player-north" class="player-zone player-north">
+      <div class="player-info">
+        <div class="player-avatar" id="avatar-north">?</div>
+        <div class="player-details">
+          <div class="player-name" id="name-north">-</div>
+          <div class="player-score" id="score-north">0</div>
+        </div>
+        <div class="trick-count" id="tricks-north">0</div>
+      </div>
+      <div class="player-cards" id="cards-north"></div>
+    </div>
+
+    <!-- WEST PLAYER -->
+    <div id="player-west" class="player-zone player-west">
+      <div class="player-info vertical">
+        <div class="player-avatar" id="avatar-west">?</div>
+        <div class="player-name" id="name-west">-</div>
+        <div class="trick-count" id="tricks-west">0</div>
+      </div>
+      <div class="player-cards player-cards-vert" id="cards-west"></div>
+    </div>
+
+    <!-- CENTER TABLE -->
+    <div id="table-center">
+      <div id="trick-area">
+        <div class="trick-slot trick-north" id="trick-north-slot"></div>
+        <div class="trick-slot trick-west" id="trick-west-slot"></div>
+        <div class="trick-slot trick-east" id="trick-east-slot"></div>
+        <div class="trick-slot trick-south" id="trick-south-slot"></div>
+      </div>
+      <div id="status-text" class="status-text"></div>
+    </div>
+
+    <!-- EAST PLAYER -->
+    <div id="player-east" class="player-zone player-east">
+      <div class="player-info vertical">
+        <div class="player-avatar" id="avatar-east">?</div>
+        <div class="player-name" id="name-east">-</div>
+        <div class="trick-count" id="tricks-east">0</div>
+      </div>
+      <div class="player-cards player-cards-vert" id="cards-east"></div>
+    </div>
+
+    <!-- SOUTH PLAYER (local) -->
+    <div id="player-south" class="player-zone player-south">
+      <div class="player-info">
+        <div class="player-avatar" id="avatar-south">?</div>
+        <div class="player-details">
+          <div class="player-name" id="name-south">-</div>
+          <div class="player-score" id="score-south">0</div>
+        </div>
+        <div class="trick-count" id="tricks-south">0</div>
+      </div>
+      <div class="player-cards" id="cards-south"></div>
+    </div>
+
+  </div>
+
+  <!-- BID PANEL -->
+  <div id="bid-panel" class="overlay-panel" style="display:none">
+    <div class="bid-panel-inner">
+      <div class="bid-title">İHALE SEÇİMİ</div>
+      <div class="bid-current" id="bid-current">Açılış: 8</div>
+      <div class="bid-grid" id="bid-grid"></div>
+      <button class="btn-pas" id="btn-pas" onclick="placeBid('PAS')">PAS</button>
+    </div>
+  </div>
+
+  <!-- TRUMP PANEL -->
+  <div id="trump-panel" class="overlay-panel" style="display:none">
+    <div class="bid-panel-inner">
+      <div class="bid-title">KOZ SEÇİN</div>
+      <div class="trump-suit-grid">
+        <button class="trump-btn suit-spades" onclick="selectTrump('spades')">♠ Maça</button>
+        <button class="trump-btn suit-hearts" onclick="selectTrump('hearts')">♥ Kupa</button>
+        <button class="trump-btn suit-diamonds" onclick="selectTrump('diamonds')">♦ Karo</button>
+        <button class="trump-btn suit-clubs" onclick="selectTrump('clubs')">♣ Sinek</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BURY PANEL -->
+  <div id="bury-panel" class="overlay-panel" style="display:none">
+    <div class="bid-panel-inner">
+      <div class="bid-title">3 KART GÖMECEKSİNİZ</div>
+      <div class="bid-current">Gömülecek kartları seçin</div>
+      <div class="bury-cards" id="bury-cards"></div>
+      <button class="btn-primary" id="btn-bury-confirm" onclick="confirmBury()" disabled>Göm (0/3)</button>
+    </div>
+  </div>
+
+  <!-- SCORE PANEL -->
+  <div id="score-panel" class="overlay-panel" style="display:none">
+    <div class="score-panel-inner">
+      <div class="score-title" id="score-title">EL SONUCU</div>
+      <div class="score-table" id="score-table"></div>
+      <div class="score-actions">
+        <button class="btn-primary" id="btn-next-round" onclick="nextRound()">Devam</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT PANEL -->
+  <div id="chat-panel" class="chat-panel" style="display:none">
+    <div class="chat-header">
+      <span>Sohbet</span>
+      <button onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-area">
+      <input type="text" id="chat-input" placeholder="Mesaj yaz..." maxlength="200" onkeydown="chatKeydown(event)">
+      <button onclick="sendChat()">Gönder</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

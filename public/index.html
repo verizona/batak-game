@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Batak</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+:root{
+  --felt:#2a5a3d; --felt2:#1e4530; --felt3:#163824;
+  --wood1:#7a4510; --wood2:#4e2c07; --wood3:#a86520; --woodl:#c88830;
+  --gold:#f5c518; --gold2:#d4a017; --red:#cc1010; --cream:#fefefe;
+  --font:'Nunito',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;font-family:var(--font);background:#111}
+.screen{display:none;position:fixed;inset:0}
+.screen.active{display:flex}
+
+/* ===== LOBBY ===== */
+#s-home,#s-mode,#s-join,#s-wait{flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,#1e4530 0%,#0c1e15 100%)}
+.logo-wrap{text-align:center;margin-bottom:36px}
+.logo-suit{font-size:70px;filter:drop-shadow(0 0 18px rgba(245,197,24,.5))}
+.logo-text{font-size:50px;font-weight:900;letter-spacing:10px;color:var(--gold);text-shadow:0 2px 12px rgba(0,0,0,.8)}
+.logo-sub{font-size:12px;color:#5a8a6a;letter-spacing:3px;text-transform:uppercase;margin-top:4px}
+.lbtn{display:flex;align-items:center;gap:12px;width:320px;padding:15px 24px;background:linear-gradient(135deg,var(--woodl),var(--wood1));border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:800;font-family:var(--font);cursor:pointer;transition:.15s;box-shadow:0 4px 14px rgba(0,0,0,.5);border-bottom:3px solid var(--wood2);margin-bottom:12px}
+.lbtn:hover{filter:brightness(1.15);transform:translateY(-2px)}
+.lbtn.out{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.2)}
+.lbtn-icon{font-size:24px}
+.hdr{display:flex;align-items:center;gap:14px;width:100%;max-width:460px;margin-bottom:28px}
+.hdr h2{font-size:22px;font-weight:800;color:var(--gold)}
+.back{background:none;border:none;color:var(--gold);font-size:26px;cursor:pointer;font-family:var(--font);font-weight:700}
+.inp{background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.15);border-radius:10px;color:#f0e6c8;font-family:var(--font);font-size:15px;padding:12px 15px;width:100%;outline:none;transition:.15s;margin-bottom:10px;display:block}
+.inp:focus{border-color:var(--gold)}
+.inp::placeholder{color:#5a7a5a}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:460px;width:100%}
+.mcard{background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);border-radius:16px;padding:22px 14px;text-align:center;cursor:pointer;transition:.2s}
+.mcard:hover,.mcard.sel{border-color:var(--gold);background:rgba(245,197,24,.1);transform:translateY(-2px)}
+.micon{font-size:30px;margin-bottom:6px}
+.mname{font-size:15px;font-weight:800;color:var(--gold)}
+.mdesc{font-size:11px;color:#5a8a6a;margin-top:3px;line-height:1.4}
+.room-code-big{font-size:30px;font-weight:900;color:var(--gold);letter-spacing:5px;background:rgba(0,0,0,.5);padding:5px 18px;border-radius:10px;border:2px solid var(--gold);margin:14px 0 22px}
+.seats-grid{display:grid;grid-template-areas:". s0 ." "s3 . s1" ". s2 .";grid-template-columns:1fr 1fr 1fr;gap:12px;max-width:360px;width:100%;margin-bottom:20px}
+.seat{background:rgba(0,0,0,.3);border:2px dashed rgba(255,255,255,.2);border-radius:10px;padding:12px;text-align:center;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:#5a8a6a}
+.seat.occ{border:2px solid var(--gold);background:rgba(245,197,24,.08);color:var(--gold);font-weight:700}
+.seat.me{border-color:#4ade80}
+.s0{grid-area:s0}.s1{grid-area:s1}.s2{grid-area:s2}.s3{grid-area:s3}
+.btn{background:linear-gradient(135deg,var(--woodl),var(--wood1));color:#fff;border:none;border-radius:10px;padding:11px 26px;font-size:15px;font-weight:700;font-family:var(--font);cursor:pointer;transition:.12s;border-bottom:3px solid var(--wood2)}
+.btn:hover{filter:brightness(1.15);transform:translateY(-1px)}
+
+/* ===== GAME ===== */
+#s-game{flex-direction:column;background:#1a3a28}
+
+/* Top bar */
+#topbar{
+  height:72px;flex-shrink:0;position:relative;
+  background:linear-gradient(180deg,#3e1e00 0%,#2a1200 100%);
+  border-bottom:3px solid #7a4808;
+  box-shadow:0 3px 14px rgba(0,0,0,.8);
+  display:flex;align-items:center;padding:0 10px;gap:8px;
+}
+.tb-sq{width:48px;height:48px;background:linear-gradient(160deg,#b87020,#7a4408);border:2px solid #d09030;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;cursor:pointer;flex-shrink:0;box-shadow:0 3px 8px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.15)}
+.tb-center{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.tb-title{font-size:14px;font-weight:900;color:#fff;letter-spacing:4px;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.tb-stats{display:flex;align-items:center;gap:8px}
+.tb-stat-box{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px 12px;font-size:14px;font-weight:800;color:#fff;display:flex;align-items:center;gap:5px}
+.tb-coin-ico{font-size:17px}
+.tb-trump-box{min-width:36px;height:36px;border-radius:8px;border:2px solid #cc3020;background:rgba(180,20,10,.4);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;color:#fff;padding:0 6px}
+
+/* Table area */
+#table-area{
+  flex:1;position:relative;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 50%,#2e6040 0%,#1e4530 50%,#122e1e 100%);
+}
+#table-area::after{
+  content:'';position:absolute;left:-10%;right:-10%;bottom:-70px;height:130px;
+  background:linear-gradient(180deg,#2a1000 0%,#4a2400 35%,#8a5010 60%,#6a3808 100%);
+  border-radius:50% 50% 0 0/100% 100% 0 0;
+  border-top:3px solid #c08020;
+  box-shadow:0 -4px 24px rgba(0,0,0,.6);
+}
+/* Table watermark */
+.table-wm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:36px;font-weight:900;letter-spacing:10px;color:rgba(255,255,255,.03);pointer-events:none;z-index:0;white-space:nowrap;user-select:none}
+
+/* Corner score badges */
+.corner-score{position:absolute;top:8px;display:flex;gap:5px;z-index:10}
+#cs-left{left:8px}
+#cs-right{right:8px}
+.csn{display:inline-flex;align-items:center;justify-content:center;background:#111;border:1px solid #333;border-radius:7px;min-width:32px;height:30px;font-size:15px;font-weight:900;color:#fff;padding:0 8px}
+.csd{display:none}
+
+/* Trump / contract info */
+#info-bar{position:absolute;bottom:172px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;z-index:10}
+.trump-pill{display:none;background:rgba(0,0,0,.7);border:1px solid var(--gold);border-radius:20px;padding:3px 14px;font-size:15px;font-weight:800;color:var(--gold)}
+.contract-pill{display:none;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:3px 12px;font-size:13px;color:#fff}
+#round-lbl{position:absolute;bottom:156px;left:50%;transform:translateX(-50%);font-size:11px;color:#5a8a6a;z-index:10;white-space:nowrap}
+
+/* ===== PLAYER ZONES ===== */
+#pz-n{position:absolute;top:10px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0;z-index:5}
+#pz-w{position:absolute;left:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:flex-start;gap:6px;z-index:5}
+#pz-e{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:flex-end;gap:6px;z-index:5}
+#pz-s{position:absolute;bottom:8px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:0;z-index:5}
+
+/* Golden player boxes */
+.pbox-gold{
+  background:linear-gradient(160deg,#c88010 0%,#8a5408 55%,#5e3804 100%);
+  border:2px solid #d89820;
+  border-radius:12px;
+  box-shadow:0 4px 18px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.18);
+}
+/* Vertical rectangle for west/east */
+.pbox-vert{width:112px;min-height:200px;display:flex;flex-direction:column;align-items:center;padding:14px 8px 10px;gap:8px;justify-content:flex-start}
+/* Wide bar for south */
+.pbox-south-bar{display:flex;align-items:center;gap:10px;padding:8px 14px 8px 8px}
+/* Avatars */
+.pav{width:74px;height:74px;border-radius:10px;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;border:1px solid rgba(255,255,255,.1)}
+.pav-round{width:50px;height:50px;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;border:1px solid rgba(255,255,255,.1)}
+/* Name & coin */
+.pname{font-size:13px;font-weight:800;color:#fff;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pname-sm{font-size:11px;font-weight:700;color:#fff;text-align:center;max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcoin{display:flex;align-items:center;gap:3px}
+.pcoin-icon{font-size:12px}
+.pcoin-val{font-size:12px;color:#ffe080;font-weight:700}
+/* Trick count badge */
+.ptrick-badge{background:#111;border:1px solid #333;border-radius:7px;min-width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;padding:0 5px}
+/* Side badge row (above west/east) */
+.badges-row{display:flex;gap:5px;align-items:center}
+/* Gift / chat circular buttons */
+.gift-btn{width:42px;height:42px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#3aaa3a,#186018);border:2px solid #4ade80;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+.chat-circle{width:50px;height:50px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#3aaa3a,#186018);border:2px solid #4ade80;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5);flex-shrink:0}
+/* North deck (stacked cards) */
+.deck-stack{position:relative;width:74px;height:104px}
+.deck-stack::before,.deck-stack::after{content:'';position:absolute;width:70px;height:98px;border-radius:7px;background:repeating-linear-gradient(45deg,#c0163a,#c0163a 3px,#880e26 3px,#880e26 8px);border:2px solid #f0a0b4}
+.deck-stack::before{top:-6px;left:3px;transform:rotate(-4deg)}
+.deck-stack::after{top:-3px;left:1px;transform:rotate(-2deg)}
+.deck-top{position:absolute;top:0;left:0;width:72px;height:100px;border-radius:7px;background:repeating-linear-gradient(45deg,#c0163a,#c0163a 3px,#880e26 3px,#880e26 8px);border:2px solid #f0a0b4;box-shadow:0 3px 12px rgba(0,0,0,.6)}
+/* South row layout */
+.south-row{display:flex;align-items:center;gap:10px;padding:4px 16px;margin-bottom:4px}
+.south-badges{display:flex;gap:5px;margin-left:6px}
+/* Active turn glow */
+.aturn .pbox-gold{
+  border-color:#44ff44!important;
+  box-shadow:0 0 0 3px #44ff44,0 0 28px rgba(68,255,68,.65)!important;
+  animation:glow 1.3s infinite;
+}
+@keyframes glow{0%,100%{box-shadow:0 0 0 2px #44ff44,0 0 18px rgba(68,255,68,.45)}50%{box-shadow:0 0 0 4px #44ff44,0 0 32px rgba(68,255,68,.75)}}
+/* Status bar */
+#status-bar{background:rgba(0,0,0,.65);border-radius:20px;padding:4px 18px;font-size:12px;color:#8aaa8a;white-space:nowrap;z-index:8;margin-bottom:3px}
+
+/* ===== CARDS ===== */
+.card{
+  width:82px;height:120px;border-radius:9px;background:#fefefe;
+  border:1px solid #ccc;position:relative;display:flex;flex-direction:column;
+  justify-content:space-between;padding:4px 6px;flex-shrink:0;
+  box-shadow:2px 3px 10px rgba(0,0,0,.55);transition:transform .12s,box-shadow .12s;
+  overflow:hidden;
+}
+.card.playable{cursor:pointer;box-shadow:0 0 0 3px var(--gold),0 4px 16px rgba(245,197,24,.5)}
+.card.back{
+  background:repeating-linear-gradient(45deg,#1e4899,#1e4899 4px,#163a7a 4px,#163a7a 9px)!important;
+  border:1px solid #0d2450;cursor:default;
+}
+.card.back::after{content:'';position:absolute;inset:5px;border:1px solid rgba(255,255,255,.1);border-radius:4px}
+.cc{display:flex;flex-direction:column;align-items:center;line-height:1}
+.cc.bot{transform:rotate(180deg)}
+.cr{font-size:17px;font-weight:900}
+.cs{font-size:13px}
+.cmid{flex:1;display:flex;align-items:center;justify-content:center;font-size:34px}
+.card.suit-hearts .cr,.card.suit-hearts .cs,.card.suit-hearts .cmid,
+.card.suit-diamonds .cr,.card.suit-diamonds .cs,.card.suit-diamonds .cmid{color:var(--red)}
+.card.suit-spades .cr,.card.suit-spades .cs,.card.suit-spades .cmid,
+.card.suit-clubs .cr,.card.suit-clubs .cs,.card.suit-clubs .cmid{color:#111}
+
+/* Hand containers */
+.hand-south{position:relative;height:168px;width:820px;max-width:97vw}
+.hand-north{display:flex;justify-content:center}
+.hand-north .card{width:34px;height:50px;border-radius:4px;margin-left:-7px;padding:2px 3px}
+.hand-north .card:first-child{margin-left:0}
+.hand-north .cmid,.hand-north .cc.bot{display:none}
+.hand-north .cr{font-size:8px}.hand-north .cs{font-size:7px}
+.hand-side{display:flex;flex-direction:column;align-items:center}
+.hand-side .card{width:34px;height:50px;border-radius:4px;margin-top:-38px;padding:2px 3px}
+.hand-side .card:first-child{margin-top:0}
+.hand-side .cmid,.hand-side .cc.bot{display:none}
+.hand-side .cr{font-size:8px}.hand-side .cs{font-size:7px}
+
+/* Trick area */
+#trick-area{position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);width:296px;height:234px;display:grid;grid-template-areas:". tn ." "tw . te" ". ts .";grid-template-columns:108px 80px 108px;grid-template-rows:77px 80px 77px;z-index:5}
+.tslot{display:flex;align-items:center;justify-content:center}
+.tn{grid-area:tn}.tw{grid-area:tw}.te{grid-area:te}.ts{grid-area:ts}
+.tslot .card{width:72px;height:105px;cursor:default!important;transform:none!important;box-shadow:2px 3px 12px rgba(0,0,0,.6)!important}
+
+/* Status */
+#status-bar{position:absolute;bottom:72px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);border-radius:20px;padding:4px 16px;font-size:12px;color:#8aaa8a;white-space:nowrap;z-index:8}
+
+/* ===== OVERLAYS ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:100}
+/* Bid overlay: semi-transparent so player sees their hand */
+#o-bid{background:rgba(0,0,0,.45);align-items:flex-start;padding-top:90px}
+.panel{background:linear-gradient(165deg,#3d2800,#1c1000);border:3px solid var(--gold);border-radius:20px;padding:28px;min-width:300px;text-align:center;box-shadow:0 0 50px rgba(0,0,0,.9)}
+.panel-title{font-size:20px;font-weight:900;color:var(--gold);letter-spacing:3px;margin-bottom:8px}
+.panel-sub{font-size:13px;color:#7a6040;margin-bottom:18px}
+.bid-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:10px}
+.bdb{background:linear-gradient(160deg,#5a3800,#2a1600);border:2px solid rgba(245,197,24,.3);color:var(--gold);border-radius:9px;padding:12px 0;font-size:18px;font-weight:800;font-family:var(--font);cursor:pointer;transition:.12s}
+.bdb:hover:not(:disabled){background:linear-gradient(160deg,#8a5800,#4a2800);border-color:var(--gold);transform:scale(1.07)}
+.bdb:disabled{opacity:.25;cursor:not-allowed}
+.pas-btn{background:rgba(180,0,0,.2);border:2px solid #a00;color:#e74c3c;border-radius:9px;padding:10px 28px;font-size:15px;font-weight:800;font-family:var(--font);cursor:pointer;width:100%}
+.pas-btn:hover{background:rgba(180,0,0,.4)}
+.trump-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.trbtn{padding:18px;border-radius:12px;font-size:22px;font-weight:800;font-family:var(--font);cursor:pointer;border:2px solid rgba(255,255,255,.15);transition:.12s}
+.trbtn:hover{transform:scale(1.06);border-color:#fff}
+.tr-sp{background:rgba(30,30,60,.9);color:#aabbff}
+.tr-he{background:rgba(60,20,20,.9);color:#ff7070}
+.tr-di{background:rgba(60,35,10,.9);color:#ffb040}
+.tr-cl{background:rgba(20,50,20,.9);color:#70dd70}
+.score-rows{width:100%;margin:14px 0}
+.score-row{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;border-radius:8px;margin-bottom:5px;background:rgba(255,255,255,.04)}
+.score-row.win{background:rgba(245,197,24,.1)}.score-row.lose{background:rgba(180,0,0,.08)}
+.sdelta{font-weight:800;font-size:16px}.sdelta.pos{color:#4ade80}.sdelta.neg{color:#f87171}
+.stotal{color:var(--gold);font-size:12px}
+.bury-cards{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px 0;min-height:90px}
+.bwrap{cursor:pointer}
+.bwrap.sel .card{box-shadow:0 0 0 3px #f87171!important;transform:translateY(-6px)}
+.bwrap .card{width:58px;height:84px}
+
+/* Chat */
+#chat-panel{position:fixed;right:0;top:56px;bottom:0;width:260px;background:rgba(8,5,2,.96);border-left:2px solid var(--wood1);display:none;flex-direction:column;z-index:50}
+.chat-hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 13px;border-bottom:1px solid var(--wood1);font-weight:700;font-size:13px;color:var(--gold)}
+.chat-hdr button{background:none;border:none;color:#666;cursor:pointer;font-size:16px}
+#chat-msgs{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:5px}
+.cmsg{background:rgba(255,255,255,.05);border-radius:7px;padding:5px 9px;font-size:12px;line-height:1.4;color:#ccc}
+.cmsg.sys{background:rgba(245,197,24,.07);border-left:2px solid var(--gold);color:#7a6040;font-style:italic}
+.cname{font-weight:800;color:var(--gold);margin-right:3px}
+.chat-inp{padding:8px;border-top:1px solid var(--wood1);display:flex;gap:6px}
+.chat-inp input{flex:1;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:#eee;font-family:var(--font);font-size:12px;padding:7px 9px;outline:none}
+.chat-inp input:focus{border-color:var(--gold)}
+.chat-inp button{background:var(--wood1);border:none;border-radius:7px;color:#fff;padding:7px 10px;font-family:var(--font);font-weight:700;font-size:11px;cursor:pointer}
+.toast{position:fixed;top:64px;left:50%;transform:translateX(-50%);background:rgba(20,12,2,.97);border:2px solid var(--gold);border-radius:12px;padding:10px 24px;font-size:15px;font-weight:800;color:var(--gold);z-index:999;pointer-events:none;animation:tin .2s ease,tout .3s ease 2.5s forwards;white-space:nowrap}
+@keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes tout{to{opacity:0;transform:translateX(-50%) translateY(-8px)}}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="s-home" class="screen active">
+  <div class="logo-wrap">
+    <div class="logo-suit">♠</div>
+    <div class="logo-text">BATAK</div>
+    <div class="logo-sub">Türk Koz Oyunu</div>
+  </div>
+  <button class="lbtn" onclick="goMode('ai')"><span class="lbtn-icon">🤖</span>Bilgisayara Karşı</button>
+  <button class="lbtn" onclick="goMode('create')"><span class="lbtn-icon">👥</span>Özel Masa Kur</button>
+  <button class="lbtn out" onclick="show('s-join')"><span class="lbtn-icon">🔍</span>Masaya Katıl</button>
+</div>
+
+<!-- MODE -->
+<div id="s-mode" class="screen">
+  <div class="hdr"><button class="back" onclick="show('s-home')">‹</button><h2>Oyun Modu</h2></div>
+  <div class="mode-grid">
+    <div class="mcard" onclick="selMode('goemmeli')"><div class="micon">♠♥</div><div class="mname">Gömmeli</div><div class="mdesc">Dağıtıcı 3 kart gömer</div></div>
+    <div class="mcard" onclick="selMode('ihaleli')"><div class="micon">🏆</div><div class="mname">İhaleli</div><div class="mdesc">Standart ihale ile batak</div></div>
+    <div class="mcard" onclick="selMode('esli')"><div class="micon">👫</div><div class="mname">Eşli</div><div class="mdesc">2×2 takım halinde</div></div>
+    <div class="mcard" onclick="selMode('ihalesiz')"><div class="micon">🃏</div><div class="mname">İhalesiz</div><div class="mdesc">Koz karttan belli olur</div></div>
+  </div>
+</div>
+
+<!-- JOIN -->
+<div id="s-join" class="screen">
+  <div class="hdr"><button class="back" onclick="show('s-home')">‹</button><h2>Masaya Katıl</h2></div>
+  <div style="width:100%;max-width:320px">
+    <input id="j-name" class="inp" placeholder="Adınız" maxlength="16">
+    <input id="j-code" class="inp" placeholder="Oda Kodu" maxlength="8" style="text-transform:uppercase">
+    <button class="btn" style="width:100%;margin-top:4px" onclick="joinRoom()">Katıl</button>
+  </div>
+</div>
+
+<!-- WAITING -->
+<div id="s-wait" class="screen">
+  <div style="color:#5a8a6a;font-size:13px;margin-bottom:6px">Oda Kodu</div>
+  <div class="room-code-big" id="w-code">------</div>
+  <div class="seats-grid" id="w-seats">
+    <div class="seat s0" id="seat-0">Kuzey</div>
+    <div class="seat s1" id="seat-1">Doğu</div>
+    <div class="seat s2" id="seat-2">Güney</div>
+    <div class="seat s3" id="seat-3">Batı</div>
+  </div>
+  <div id="w-start" style="display:none;margin-bottom:12px"><button class="btn" onclick="startGame()">▶ Oyunu Başlat</button></div>
+  <div id="w-msg" style="font-size:13px;color:#5a8a6a">Host oyunu başlatana kadar bekleyin...</div>
+</div>
+
+<!-- GAME -->
+<div id="s-game" class="screen">
+
+  <!-- Top bar -->
+  <div id="topbar">
+    <div class="tb-sq" onclick="leaveGame()">‹</div>
+    <div class="tb-center">
+      <div class="tb-title" id="tb-title">İHALELİ</div>
+      <div class="tb-stats">
+        <div class="tb-stat-box"><span id="tb-round">1/4</span></div>
+        <div class="tb-stat-box"><span id="tb-coins">0</span><span class="tb-coin-ico">🪙</span></div>
+        <div class="tb-trump-box" id="tb-trump" style="display:none"></div>
+      </div>
+    </div>
+    <div class="tb-sq" onclick="toggleChat()">⚙</div>
+  </div>
+
+  <!-- Table area -->
+  <div id="table-area">
+
+    <!-- Watermark -->
+    <div class="table-wm">BATAK</div>
+
+    <!-- Corner score badges -->
+    <div class="corner-score" id="cs-left">
+      <span class="csn" id="cs-l1">0</span>
+      <span class="csn" id="cs-l2">0</span>
+    </div>
+    <div class="corner-score" id="cs-right">
+      <span class="csn" id="cs-r1">0</span>
+      <span class="csn" id="cs-r2">0</span>
+    </div>
+
+    <!-- hidden elements kept for JS compatibility -->
+    <span id="trump-pill" style="display:none"></span>
+    <span id="contract-pill" style="display:none"></span>
+    <span id="round-lbl" style="display:none">El 1 / 4</span>
+
+    <!-- NORTH: just a deck stack, hidden player info kept for JS -->
+    <div id="pz-n">
+      <div class="deck-stack"><div class="deck-top"></div></div>
+      <div id="pbox-n" style="display:none"><span id="av-n">👤</span><span id="nm-n">-</span></div>
+      <span id="sc-n" style="display:none">0</span>
+      <div id="tr-n" style="display:none">0</div>
+      <div class="hand-north" id="hand-n" style="display:none"></div>
+    </div>
+
+    <!-- WEST: vertical gold rectangle + side cards -->
+    <div id="pz-w">
+      <div class="badges-row">
+        <div class="ptrick-badge" id="tr-w">0</div>
+      </div>
+      <div class="pbox-gold pbox-vert" id="pbox-w">
+        <div class="pav" id="av-w">👤</div>
+        <div class="pname-sm" id="nm-w">-</div>
+        <div class="pcoin"><span class="pcoin-icon">🪙</span><span class="pcoin-val" id="sc-w">0</span></div>
+      </div>
+      <div class="gift-btn">🎁</div>
+      <div class="hand-side" id="hand-w"></div>
+    </div>
+
+    <!-- EAST: vertical gold rectangle + side cards -->
+    <div id="pz-e">
+      <div class="badges-row" style="justify-content:flex-end">
+        <div class="ptrick-badge" id="tr-e">0</div>
+      </div>
+      <div class="pbox-gold pbox-vert" id="pbox-e">
+        <div class="pav" id="av-e">👤</div>
+        <div class="pname-sm" id="nm-e">-</div>
+        <div class="pcoin"><span class="pcoin-icon">🪙</span><span class="pcoin-val" id="sc-e">0</span></div>
+      </div>
+      <div class="gift-btn">🎁</div>
+      <div class="hand-side" id="hand-e"></div>
+    </div>
+
+    <!-- TRICK center -->
+    <div id="trick-area">
+      <div class="tslot tn" id="t-n"></div>
+      <div class="tslot tw" id="t-w"></div>
+      <div class="tslot te" id="t-e"></div>
+      <div class="tslot ts" id="t-s"></div>
+    </div>
+
+    <!-- SOUTH local player -->
+    <div id="pz-s">
+      <div id="status-bar">Bekleniyor...</div>
+      <div class="hand-south" id="hand-s"></div>
+      <div class="south-row">
+        <div class="chat-circle" onclick="toggleChat()">💬</div>
+        <div class="pbox-gold pbox-south-bar" id="pbox-s">
+          <div class="pav-round" id="av-s">👤</div>
+          <div style="flex:1">
+            <div class="pname" id="nm-s">Siz</div>
+            <div class="pcoin"><span class="pcoin-icon">🪙</span><span class="pcoin-val" id="sc-s">0</span></div>
+          </div>
+          <div class="south-badges">
+            <div class="ptrick-badge" id="tr-s">0</div>
+          </div>
+        </div>
+        <div class="gift-btn">🎁</div>
+      </div>
+    </div>
+
+  </div><!-- /table-area -->
+
+  <!-- Chat panel -->
+  <div id="chat-panel">
+    <div class="chat-hdr"><span>Sohbet</span><button onclick="toggleChat()">✕</button></div>
+    <div id="chat-msgs"></div>
+    <div class="chat-inp">
+      <input id="chat-in" placeholder="Mesaj..." maxlength="200" onkeydown="if(event.key==='Enter')sendChat()">
+      <button onclick="sendChat()">→</button>
+    </div>
+  </div>
+</div>
+
+<!-- BID -->
+<div id="o-bid" class="overlay" style="display:none">
+  <div class="panel">
+    <div class="panel-title">İHALE SEÇİMİ</div>
+    <div class="panel-sub" id="bid-cur">Açılış: 7</div>
+    <div class="bid-grid" id="bid-btns"></div>
+    <button class="pas-btn" id="pas-btn" onclick="placeBid('PAS')">PAS</button>
+  </div>
+</div>
+
+<!-- TRUMP -->
+<div id="o-trump" class="overlay" style="display:none">
+  <div class="panel">
+    <div class="panel-title">KOZ SEÇİN</div>
+    <div class="trump-grid">
+      <button class="trbtn tr-sp" onclick="selectTrump('spades')">♠ Maça</button>
+      <button class="trbtn tr-he" onclick="selectTrump('hearts')">♥ Kupa</button>
+      <button class="trbtn tr-di" onclick="selectTrump('diamonds')">♦ Karo</button>
+      <button class="trbtn tr-cl" onclick="selectTrump('clubs')">♣ Sinek</button>
+    </div>
+  </div>
+</div>
+
+<!-- BURY -->
+<div id="o-bury" class="overlay" style="display:none">
+  <div class="panel">
+    <div class="panel-title">KART GÖMÜN</div>
+    <div class="panel-sub">3 kart seçin</div>
+    <div class="bury-cards" id="bury-cards"></div>
+    <button class="btn" id="bury-ok" onclick="confirmBury()" disabled style="width:100%">Göm (0/3)</button>
+  </div>
+</div>
+
+<!-- SCORE -->
+<div id="o-score" class="overlay" style="display:none">
+  <div class="panel" style="min-width:320px">
+    <div class="panel-title" id="score-title">EL SONUCU</div>
+    <div class="score-rows" id="score-rows"></div>
+    <button class="btn" id="score-ok" onclick="nextRound()" style="width:100%">Devam</button>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const S={spades:'♠',hearts:'♥',diamonds:'♦',clubs:'♣'};
+const SN={spades:'Maça',hearts:'Kupa',diamonds:'Karo',clubs:'Sinek'};
+const AV=['👤','😎','🎩','🦊','🐱','🐻','🦁','🐯','🐸','🎭','👑','🤠'];
+const ML={goemmeli:'GÖMMELİ',ihaleli:'İHALELİ',esli:'EŞLİ',ihalesiz:'İHALESİZ'};
+
+let sock,myName='',myAv=0,mySeat=0,myRoom='',players=[],buryPick=[],gMode='ihaleli',pAction='';
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function setStatus(m){const el=document.getElementById('status-bar');if(el)el.textContent=m}
+function toast(m,err=false){const t=document.createElement('div');t.className='toast';if(err)t.style.borderColor='#f87171';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3200)}
+function sysChat(m){const d=document.createElement('div');d.className='cmsg sys';d.textContent=m;const c=document.getElementById('chat-msgs');c.appendChild(d);c.scrollTop=c.scrollHeight}
+function addChat(n,m){const d=document.createElement('div');d.className='cmsg';d.innerHTML=`<span class="cname">${n}:</span>${m}`;const c=document.getElementById('chat-msgs');c.appendChild(d);c.scrollTop=c.scrollHeight}
+function toggleChat(){const p=document.getElementById('chat-panel');p.style.display=p.style.display==='flex'?'none':'flex'}
+function sendChat(){const i=document.getElementById('chat-in'),m=i.value.trim();if(!m)return;sock.emit('send_chat',{message:m});addChat(myName,m);i.value=''}
+
+function goMode(a){
+  if(!myName){myName=(prompt('Adınız?','')||'').trim().substring(0,16);if(!myName)return}
+  pAction=a;show('s-mode')
+}
+function selMode(m){
+  gMode=m;
+  document.querySelectorAll('.mcard').forEach((c,i)=>{const ms=['goemmeli','ihaleli','esli','ihalesiz'];c.classList.toggle('sel',ms[i]===m)});
+  setTimeout(initSock,200)
+}
+function joinRoom(){
+  const n=document.getElementById('j-name').value.trim(),c=document.getElementById('j-code').value.trim().toUpperCase();
+  if(!n){alert('Adınızı girin');return}if(!c){alert('Oda kodu girin');return}
+  myName=n;initSock(()=>sock.emit('join_room',{roomId:c,name:myName,avatar:myAv}))
+}
+function startGame(){sock.emit('start_game')}
+function leaveGame(){if(confirm('Çıkmak istiyor musunuz?')){sock.disconnect();show('s-home')}}
+
+function initSock(cb){
+  if(sock&&sock.connected){if(cb)cb();return}
+  sock=io();
+  sock.on('connect',()=>{if(cb){cb();return}sock.emit('create_room',{name:myName,avatar:myAv,mode:gMode,vsAI:pAction==='ai'})});
+  sock.on('room_created',({roomId,seat})=>{myRoom=roomId;mySeat=seat;document.getElementById('w-code').textContent=roomId;document.getElementById('w-start').style.display='block';document.getElementById('w-msg').style.display='none';show('s-wait')});
+  sock.on('room_joined',({roomId,seat})=>{myRoom=roomId;mySeat=seat;document.getElementById('w-code').textContent=roomId;document.getElementById('w-start').style.display='none';document.getElementById('w-msg').style.display='block';show('s-wait')});
+  sock.on('room_state',(st)=>{players=st.players;if(st.mySeat!==undefined)mySeat=st.mySeat;renderWait(st);if(st.gameState&&document.getElementById('s-game').classList.contains('active'))applyState(st.gameState)});
+  sock.on('game_started',({mode})=>{gMode=mode;document.getElementById('tb-title').textContent=ML[mode]||mode;clearTable();hideOverlays();show('s-game');setStatus('Kartlar dağıtılıyor...')});
+  sock.on('round_started',({round})=>{document.getElementById('round-lbl').textContent='El '+round+' / 4';document.getElementById('tb-round').textContent=round+'/4';clearTable();hideOverlays();setStatus('Yeni el...')});
+  sock.on('bury_prompt',({extraCards})=>showBuryPanel(extraCards));
+  sock.on('buried',()=>{document.getElementById('o-bury').style.display='none';sysChat('Dağıtıcı gömdü.')});
+  sock.on('bidding_started',({currentBidder,minBid})=>{const me=currentBidder===mySeat;if(me)showBidPanel(minBid||6,true);else document.getElementById('o-bid').style.display='none';setTurn(currentBidder);setStatus(me?'İhale sırası sizde!':pname(currentBidder)+' ihale yapıyor...')});
+  sock.on('bid_placed',({seat,bid})=>sysChat(pname(seat)+': '+(bid==='PAS'?'PAS':bid)));
+  sock.on('bidding_won',({winner,bid})=>{document.getElementById('o-bid').style.display='none';sysChat(pname(winner)+' '+bid+' ile açtı!');setStatus(pname(winner)+' koz seçiyor...');if(winner===mySeat)document.getElementById('o-trump').style.display='flex'});
+  sock.on('hediye',()=>{document.getElementById('o-bid').style.display='none';toast('🎁 HEDİYE! Kimse açmadı!');sysChat('Hediye el!')});
+  sock.on('trump_selected',({suit,declarer})=>{document.getElementById('o-trump').style.display='none';const tp=document.getElementById('trump-pill');tp.style.display='inline';tp.textContent='Koz: '+S[suit]+' '+SN[suit];const tbt=document.getElementById('tb-trump');tbt.style.display='block';tbt.textContent=S[suit]+' '+SN[suit];toast(S[suit]+' '+SN[suit]+' koz!');sysChat(pname(declarer)+' koz: '+S[suit]+' '+SN[suit])});
+  sock.on('card_played',({seatIndex,card,trickComplete})=>{renderTrickCard(seatIndex,card);if(!trickComplete){const ns=(seatIndex+1)%4;setTurn(ns);setStatus(ns===mySeat?'Sıra sizde!':pname(ns)+' oynuyor...')}});
+  sock.on('trick_won',({winner,tricks,roundOver,scores,delta,made,gameOver})=>{flashWin(winner);sysChat(pname(winner)+' eli aldı ('+tricks[winner]+')');setTimeout(()=>{clearTrickArea();updateTricks(tricks);updateScores(scores);if(roundOver)showScore(scores,delta,made,tricks,gameOver);else{setTurn(winner);setStatus(winner===mySeat?'Sıra sizde!':pname(winner)+' oynuyor...')}},950)});
+  sock.on('playing_started',({trump})=>{if(trump){const tp=document.getElementById('trump-pill');tp.style.display='inline';tp.textContent='Koz: '+S[trump]+' '+SN[trump]}});
+  sock.on('chat_message',({name,message})=>{if(name!==myName)addChat(name,message)});
+  sock.on('error',({msg})=>toast('⚠ '+msg,true));
+}
+
+function s2p(seat){return['s','e','n','w'][(seat-mySeat+4)%4]}
+function p2s(p){return(mySeat+{s:0,e:1,n:2,w:3}[p])%4}
+function pname(seat){const p=players.find(x=>x.seat===seat);return p?p.name:'Oyuncu'+(seat+1)}
+
+function renderWait(st){
+  for(let i=0;i<4;i++){const el=document.getElementById('seat-'+i);const p=st.players.find(x=>x.seat===i);if(p){el.className='seat s'+i+(p.seat===mySeat?' me occ':' occ');el.innerHTML=(AV[p.avatar]||'👤')+'<br>'+p.name+(p.isAI?' 🤖':'')}else{el.className='seat s'+i;el.textContent=['Kuzey','Doğu','Güney','Batı'][i]}}
+  const isHost=st.host===sock.id;
+  document.getElementById('w-start').style.display=isHost?'block':'none';
+  document.getElementById('w-msg').style.display=isHost?'none':'block';
+}
+
+function applyState(gs){
+  if(!gs)return;
+  ['e','s','w'].forEach(p=>{const seat=p2s(p),pl=players.find(x=>x.seat===seat);if(pl){document.getElementById('av-'+p).textContent=AV[pl.avatar]||'👤';document.getElementById('nm-'+p).textContent=pl.name}});
+  if(gs.scores)updateScores(gs.scores);
+  if(gs.tricks)updateTricks(gs.tricks);
+  if(gs.round){document.getElementById('round-lbl').textContent='El '+gs.round+' / '+(gs.maxRounds||4);document.getElementById('tb-round').textContent=gs.round+'/'+(gs.maxRounds||4)}
+  if(gs.trump){const tp=document.getElementById('trump-pill');tp.style.display='inline';tp.textContent='Koz: '+S[gs.trump]+' '+SN[gs.trump];const tbt=document.getElementById('tb-trump');tbt.style.display='block';tbt.textContent=S[gs.trump]+' '+SN[gs.trump]}
+  if(gs.hand?.length)renderHand(gs.hand,gs);
+  if(gs.currentTrick?.length)gs.currentTrick.forEach(t=>renderTrickCard(t.seatIndex,t.card));
+  if(gs.state==='BIDDING'&&gs.currentBidder!==undefined){const me=gs.currentBidder===mySeat;if(me)showBidPanel(gs.highBid||6,true);setTurn(gs.currentBidder);setStatus(me?'İhale sırası sizde!':pname(gs.currentBidder)+' ihale yapıyor...')}
+  else if(gs.state==='TRUMP_SELECTION'){if(gs.declarer===mySeat)document.getElementById('o-trump').style.display='flex';else setStatus(pname(gs.declarer)+' koz seçiyor...')}
+  else if(gs.state==='BURYING'){if(gs.dealer===mySeat&&gs.extraCards?.length)showBuryPanel(gs.extraCards);else setStatus('Dağıtıcı gömüyor...')}
+  else if(gs.state==='PLAYING'){const tl=gs.currentTrick?.length||0,ns=tl===0?gs.leadSeat:(gs.currentTrick[tl-1].seatIndex+1)%4;setTurn(ns);setStatus(ns===mySeat?'Sıra sizde!':pname(ns)+' oynuyor...')}
+}
+
+function updateScores(scores){
+  if(!scores)return;
+  ['n','e','s','w'].forEach(p=>{const seat=p2s(p);document.getElementById('sc-'+p).textContent=scores[seat]||0});
+  document.getElementById('tb-coins').textContent=scores[mySeat]||0;
+  const n=p2s('n'),w=p2s('w'),e=p2s('e');
+  document.getElementById('cs-l1').textContent=scores[n]||0;
+  document.getElementById('cs-l2').textContent=scores[w]||0;
+  document.getElementById('cs-r1').textContent=scores[e]||0;
+  document.getElementById('cs-r2').textContent=scores[mySeat]||0;
+}
+
+function updateTricks(tricks){
+  ['n','e','s','w'].forEach(p=>{const seat=p2s(p);const el=document.getElementById('tr-'+p);if(el)el.textContent=tricks[seat]||0});
+}
+
+const CARD_VAL={'2':0,'3':1,'4':2,'5':3,'6':4,'7':5,'8':6,'9':7,'10':8,'J':9,'Q':10,'K':11,'A':12};
+function sortHand(cards){
+  const suitCount={spades:0,hearts:0,diamonds:0,clubs:0};
+  cards.forEach(c=>suitCount[c.suit]=(suitCount[c.suit]||0)+1);
+  // Sort suits: most cards first, tie-break by fixed order
+  const suitPref=['spades','hearts','diamonds','clubs'];
+  const suitOrder=Object.entries(suitCount)
+    .sort((a,b)=>b[1]-a[1]||suitPref.indexOf(a[0])-suitPref.indexOf(b[0]))
+    .map(e=>e[0]);
+  return cards.slice().sort((a,b)=>{
+    const si=suitOrder.indexOf(a.suit)-suitOrder.indexOf(b.suit);
+    if(si!==0)return si;
+    return CARD_VAL[String(b.rank)]-CARD_VAL[String(a.rank)]; // high→low within suit
+  });
+}
+function renderHand(cards,gs){
+  const cont=document.getElementById('hand-s');cont.innerHTML='';
+  const sorted=sortHand(cards);
+  const playable=getPlayable(cards,gs);
+  const n=sorted.length;
+  const cardW=82;
+  // Fan: tighter angles for bigger cards, more overlap
+  const maxAngle=Math.min(32,n*2.6);
+  const step=n>1?(maxAngle*2)/(n-1):0;
+  // Overlap cards more — spacing relative to screen width
+  const availW=Math.min(window.innerWidth*0.92,840);
+  const spacing=n>1?Math.min(cardW-8,availW/(n)):cardW;
+
+  sorted.forEach((c,i)=>{
+    const el=mkCard(c,playable.includes(c.id));
+    const angle=n>1?-maxAngle+step*i:0;
+    const xOff=(i-(n-1)/2)*spacing;
+    // Arc: cards rise toward center (cosine arc)
+    const yOff=Math.abs(angle)*1.1;
+    el.style.position='absolute';
+    el.style.left='50%';
+    el.style.bottom='0px';
+    el.style.marginLeft=(-cardW/2)+'px';
+    el.style.transform=`translateX(${xOff}px) translateY(-${yOff}px) rotate(${angle}deg)`;
+    el.style.transformOrigin='bottom center';
+    el.style.zIndex=i+1;
+    if(playable.includes(c.id)){
+      el.onclick=()=>sock.emit('play_card',{cardId:c.id});
+      const baseT=`translateX(${xOff}px) translateY(-${yOff}px) rotate(${angle}deg)`;
+      const hoverT=`translateX(${xOff}px) translateY(-${yOff+30}px) rotate(${angle}deg) scale(1.08)`;
+      el.onmouseenter=()=>{el.style.transform=hoverT;el.style.zIndex=50};
+      el.onmouseleave=()=>{el.style.transform=baseT;el.style.zIndex=i+1};
+    }
+    cont.appendChild(el);
+  });
+  // Others' backs
+  ['n','e','w'].forEach(p=>{
+    const seat=p2s(p),cnt=gs.handCounts?gs.handCounts[seat]:0;
+    const hc=document.getElementById('hand-'+p);hc.innerHTML='';
+    for(let i=0;i<cnt;i++){const b=document.createElement('div');b.className='card back';hc.appendChild(b)}
+  });
+}
+
+function getPlayable(hand,gs){
+  if(!gs||gs.state!=='PLAYING')return[];
+  const tl=gs.currentTrick?.length||0,ns=tl===0?gs.leadSeat:(gs.currentTrick[tl-1].seatIndex+1)%4;
+  if(ns!==mySeat)return[];
+  if(tl===0)return hand.map(c=>c.id);
+  const led=gs.currentTrick[0].card.suit,have=hand.filter(c=>c.suit===led);
+  return have.length?have.map(c=>c.id):hand.map(c=>c.id);
+}
+
+const SUIT_ROW={clubs:0,diamonds:1,hearts:2,spades:3};
+const RANK_COL={'A':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7,'9':8,'10':9,'J':10,'Q':11,'K':12};
+let useSprite=false;
+// Probe for sprite sheet once
+(()=>{const t=new Image();t.onload=()=>{useSprite=true};t.src='/cards.png?t='+Date.now()})();
+function mkCard(c,playable=false){
+  const d=document.createElement('div');
+  d.className='card suit-'+c.suit+(playable?' playable':'');
+  if(useSprite){
+    const col=RANK_COL[String(c.rank)],row=SUIT_ROW[c.suit];
+    d.style.cssText+=';background-image:url(/cards.png);background-size:1300% 400%;background-position:'+`${col/12*100}% ${row/3*100}%`;
+    d.style.padding='0';d.style.display='block';
+  } else {
+    d.innerHTML=`<div class="cc"><div class="cr">${c.rank}</div><div class="cs">${S[c.suit]}</div></div><div class="cmid">${S[c.suit]}</div><div class="cc bot"><div class="cr">${c.rank}</div><div class="cs">${S[c.suit]}</div></div>`;
+  }
+  return d;
+}
+
+function renderTrickCard(seatIndex,card){
+  const pos=s2p(seatIndex),slot=document.getElementById('t-'+pos);if(!slot)return;
+  slot.innerHTML='';slot.appendChild(mkCard(card));
+}
+function clearTrickArea(){['n','s','e','w'].forEach(p=>{const s=document.getElementById('t-'+p);if(s)s.innerHTML=''})}
+function clearTable(){
+  clearTrickArea();
+  ['n','s','e','w'].forEach(p=>{const h=document.getElementById('hand-'+p);if(h)h.innerHTML=''});
+  document.getElementById('trump-pill').style.display='none';
+  document.getElementById('contract-pill').style.display='none';
+  document.getElementById('tb-trump').style.display='none';
+}
+
+function setTurn(seat){
+  ['pz-n','pz-s','pz-e','pz-w'].forEach(id=>document.getElementById(id).classList.remove('aturn'));
+  document.getElementById('pz-'+s2p(seat))?.classList.add('aturn');
+}
+function flashWin(seat){
+  const pos=s2p(seat),slot=document.getElementById('t-'+pos);
+  if(slot){slot.style.outline='3px solid #4ade80';setTimeout(()=>slot.style.outline='',900)}
+}
+
+function showBidPanel(highBid,isMe){
+  document.getElementById('bid-cur').textContent=highBid>=7?'Güncel: '+highBid:'Açılış: 7';
+  const grid=document.getElementById('bid-btns');grid.innerHTML='';
+  for(let i=7;i<=13;i++){const b=document.createElement('button');b.className='bdb';b.textContent=i;b.disabled=!isMe||i<=highBid;b.onclick=()=>placeBid(i);grid.appendChild(b)}
+  document.getElementById('pas-btn').disabled=!isMe;
+  document.getElementById('o-bid').style.display='flex';
+}
+function placeBid(v){sock.emit('place_bid',{value:v});document.getElementById('o-bid').style.display='none'}
+function selectTrump(s){sock.emit('select_trump',{suit:s});document.getElementById('o-trump').style.display='none'}
+
+function showBuryPanel(extraCards){
+  buryPick=[];const cont=document.getElementById('bury-cards');cont.innerHTML='';
+  extraCards.forEach(c=>{
+    const w=document.createElement('div');w.className='bwrap';w.appendChild(mkCard(c));
+    w.onclick=()=>{const i=buryPick.indexOf(c.id);if(i>=0){buryPick.splice(i,1);w.classList.remove('sel')}else if(buryPick.length<3){buryPick.push(c.id);w.classList.add('sel')}
+    document.getElementById('bury-ok').textContent='Göm ('+buryPick.length+'/3)';document.getElementById('bury-ok').disabled=buryPick.length!==3};
+    cont.appendChild(w);
+  });
+  document.getElementById('bury-ok').textContent='Göm (0/3)';document.getElementById('bury-ok').disabled=true;
+  document.getElementById('o-bury').style.display='flex';
+}
+function confirmBury(){if(buryPick.length!==3)return;sock.emit('bury_cards',{cardIds:buryPick});document.getElementById('o-bury').style.display='none'}
+
+function showScore(scores,delta,made,tricks,gameOver){
+  document.getElementById('score-title').textContent=gameOver?'OYUN SONA ERDİ':'EL SONUCU';
+  const rows=document.getElementById('score-rows');rows.innerHTML='';
+  players.forEach(pl=>{const i=pl.seat,d=delta?delta[i]:0;const r=document.createElement('div');r.className='score-row'+(d>0?' win':d<0?' lose':'');r.innerHTML=`<span style="font-weight:700">${pl.name}</span><span style="color:#666;font-size:12px">${tricks?tricks[i]:0} el</span><span class="sdelta ${d>=0?'pos':'neg'}">${d>=0?'+':''}${d}</span><span class="stotal">${scores?scores[i]:0} pt</span>`;rows.appendChild(r)});
+  const ok=document.getElementById('score-ok');
+  if(gameOver){ok.textContent='Ana Menü';ok.onclick=()=>{document.getElementById('o-score').style.display='none';show('s-home')}}
+  else{ok.textContent='Sonraki El ›';ok.onclick=nextRound}
+  document.getElementById('o-score').style.display='flex';
+}
+function nextRound(){document.getElementById('o-score').style.display='none';sock.emit('next_round')}
+function hideOverlays(){['o-bid','o-trump','o-bury','o-score'].forEach(id=>document.getElementById(id).style.display='none')}
+</script>
+</body>
+</html>
