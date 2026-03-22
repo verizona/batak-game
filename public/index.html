@@ -499,7 +499,7 @@ function initSock(cb){
   sock.on('trump_selected',({suit,declarer})=>{document.getElementById('o-trump').style.display='none';const tp=document.getElementById('trump-pill');tp.style.display='inline';tp.textContent='Koz: '+S[suit]+' '+SN[suit];const tbt=document.getElementById('tb-trump');tbt.style.display='block';tbt.textContent=S[suit]+' '+SN[suit];toast(S[suit]+' '+SN[suit]+' koz!');sysChat(pname(declarer)+' koz: '+S[suit]+' '+SN[suit])});
   sock.on('card_played',({seatIndex,card,trickComplete})=>{renderTrickCard(seatIndex,card);if(!trickComplete){const ns=(seatIndex+1)%4;setTurn(ns);setStatus(ns===mySeat?'Sıra sizde!':pname(ns)+' oynuyor...')}});
   sock.on('trick_won',({winner,tricks,roundOver,scores,delta,made,gameOver})=>{flashWin(winner);sysChat(pname(winner)+' eli aldı ('+tricks[winner]+')');setTimeout(()=>{clearTrickArea();updateTricks(tricks);updateScores(scores);if(roundOver)showScore(scores,delta,made,tricks,gameOver);else{setTurn(winner);setStatus(winner===mySeat?'Sıra sizde!':pname(winner)+' oynuyor...')}},950)});
-  sock.on('playing_started',({trump})=>{if(trump){const tp=document.getElementById('trump-pill');tp.style.display='inline';tp.textContent='Koz: '+S[trump]+' '+SN[trump]}});
+  sock.on('playing_started',({trump})=>{if(trump){const tp=document.getElementById('trump-pill');tp.style.display='inline';tp.textContent='Koz: '+S[trump]+' '+SN[trump];const tbt=document.getElementById('tb-trump');tbt.style.display='block';tbt.textContent=S[trump]+' '+SN[trump]}});
   sock.on('chat_message',({name,message})=>{if(name!==myName)addChat(name,message)});
   sock.on('error',({msg})=>toast('⚠ '+msg,true));
 }
@@ -584,10 +584,13 @@ function renderHand(cards,gs){
     el.style.zIndex=i+1;
     if(playable.includes(c.id)){
       el.onclick=()=>sock.emit('play_card',{cardId:c.id});
-      const baseT=`rotate(${angle}deg)`;
-      const hoverT=`translateY(-28px) rotate(${angle}deg)`;
-      el.onmouseenter=()=>{el.style.transform=hoverT;el.style.zIndex=50};
-      el.onmouseleave=()=>{el.style.transform=baseT;el.style.zIndex=i+1};
+      // Hover only on non-touch devices (avoid sticky hover on mobile)
+      if(!('ontouchstart' in window)){
+        const baseT=`rotate(${angle}deg)`;
+        const hoverT=`translateY(-28px) rotate(${angle}deg)`;
+        el.onmouseenter=()=>{el.style.transform=hoverT;el.style.zIndex=50};
+        el.onmouseleave=()=>{el.style.transform=baseT;el.style.zIndex=i+1};
+      }
     }
     cont.appendChild(el);
   });
