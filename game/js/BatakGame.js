@@ -69,7 +69,7 @@ class BatakGame {
     if (this.mode === 'goemmeli') {
       // Draw 3 göm cards first, then dealer gets 13, others get 12 (total 3+13+12*3=52)
       this.extraCards = this.deck.draw(3);
-      const hands = {};
+      const hands = [[], [], [], []];
       for (let i = 0; i < 4; i++) {
         hands[i] = this.deck.draw(i === this.dealer ? 13 : 12);
       }
