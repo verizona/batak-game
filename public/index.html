@@ -161,11 +161,11 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:var(--font);backgro
   border:1px solid #0d2450;cursor:default;
 }
 .card.back::after{content:'';position:absolute;inset:5px;border:1px solid rgba(255,255,255,.1);border-radius:4px}
-.cc{display:flex;flex-direction:column;align-items:center;line-height:1}
-.cc.bot{transform:rotate(180deg)}
-.cr{font-size:17px;font-weight:900}
-.cs{font-size:13px}
-.cmid{flex:1;display:flex;align-items:center;justify-content:center;font-size:34px}
+.cc{position:absolute;top:3px;left:4px;display:flex;flex-direction:column;align-items:flex-start;line-height:1.1}
+.cc.bot{top:auto;bottom:3px;left:auto;right:4px;transform:rotate(180deg)}
+.cr{font-size:18px;font-weight:900;line-height:1}
+.cs{font-size:14px;line-height:1}
+.cmid{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:30px;pointer-events:none}
 .card.suit-hearts .cr,.card.suit-hearts .cs,.card.suit-hearts .cmid,
 .card.suit-diamonds .cr,.card.suit-diamonds .cs,.card.suit-diamonds .cmid{color:var(--red)}
 .card.suit-spades .cr,.card.suit-spades .cs,.card.suit-spades .cmid,
