@@ -172,7 +172,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:var(--font);backgro
 .card.suit-clubs .cr,.card.suit-clubs .cs,.card.suit-clubs .cmid{color:#111}
 
 /* Hand containers */
-.hand-south{position:relative;height:175px;width:96vw;max-width:860px}
+.hand-south{position:relative;height:185px;width:100vw;max-width:900px;overflow:visible}
 .hand-north{display:flex;justify-content:center}
 .hand-north .card{width:34px;height:50px;border-radius:4px;margin-left:-7px;padding:2px 3px}
 .hand-north .card:first-child{margin-left:0}
@@ -566,28 +566,26 @@ function renderHand(cards,gs){
   const playable=getPlayable(cards,gs);
   const n=sorted.length;
   const cardW=82;
-  const availW=Math.min(window.innerWidth*0.96,840);
-  const spacing=n>1?Math.min(65,(availW-cardW)/(n-1)):cardW;
-  const maxAngle=Math.min(28,spacing*0.45);
-  const step=n>1?(maxAngle*2)/(n-1):0;
+  // All cards stack at same position; rotating around a virtual point far below
+  // creates a natural fan without needing x-offset calculations.
+  const R=460; // px from card top to virtual fan center (360px below card bottom)
+  const totalAngle=Math.min(36,n*2.8); // total fan spread in degrees
+  const angleStep=n>1?totalAngle/(n-1):0;
 
   sorted.forEach((c,i)=>{
     const el=mkCard(c,playable.includes(c.id));
-    const angle=n>1?-maxAngle+step*i:0;
-    const xOff=(i-(n-1)/2)*spacing;
-    // Arc: cards rise toward center (cosine arc)
-    const yOff=Math.abs(angle)*1.1;
+    const angle=n>1?-totalAngle/2+angleStep*i:0;
     el.style.position='absolute';
     el.style.left='50%';
     el.style.bottom='0px';
     el.style.marginLeft=(-cardW/2)+'px';
-    el.style.transform=`translateX(${xOff}px) translateY(-${yOff}px) rotate(${angle}deg)`;
-    el.style.transformOrigin='bottom center';
+    el.style.transformOrigin=`${cardW/2}px ${R}px`;
+    el.style.transform=`rotate(${angle}deg)`;
     el.style.zIndex=i+1;
     if(playable.includes(c.id)){
       el.onclick=()=>sock.emit('play_card',{cardId:c.id});
-      const baseT=`translateX(${xOff}px) translateY(-${yOff}px) rotate(${angle}deg)`;
-      const hoverT=`translateX(${xOff}px) translateY(-${yOff+30}px) rotate(${angle}deg) scale(1.08)`;
+      const baseT=`rotate(${angle}deg)`;
+      const hoverT=`translateY(-28px) rotate(${angle}deg)`;
       el.onmouseenter=()=>{el.style.transform=hoverT;el.style.zIndex=50};
       el.onmouseleave=()=>{el.style.transform=baseT;el.style.zIndex=i+1};
     }
