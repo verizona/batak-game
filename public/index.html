@@ -172,7 +172,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:var(--font);backgro
 .card.suit-clubs .cr,.card.suit-clubs .cs,.card.suit-clubs .cmid{color:#111}
 
 /* Hand containers */
-.hand-south{position:relative;height:168px;width:820px;max-width:97vw}
+.hand-south{position:relative;height:175px;width:96vw;max-width:860px}
 .hand-north{display:flex;justify-content:center}
 .hand-north .card{width:34px;height:50px;border-radius:4px;margin-left:-7px;padding:2px 3px}
 .hand-north .card:first-child{margin-left:0}
@@ -566,12 +566,10 @@ function renderHand(cards,gs){
   const playable=getPlayable(cards,gs);
   const n=sorted.length;
   const cardW=82;
-  // Fan: tighter angles for bigger cards, more overlap
-  const maxAngle=Math.min(32,n*2.6);
+  const availW=Math.min(window.innerWidth*0.96,840);
+  const spacing=n>1?Math.min(65,(availW-cardW)/(n-1)):cardW;
+  const maxAngle=Math.min(28,spacing*0.45);
   const step=n>1?(maxAngle*2)/(n-1):0;
-  // Overlap cards more — spacing relative to screen width
-  const availW=Math.min(window.innerWidth*0.92,840);
-  const spacing=n>1?Math.min(cardW-8,availW/(n)):cardW;
 
   sorted.forEach((c,i)=>{
     const el=mkCard(c,playable.includes(c.id));
