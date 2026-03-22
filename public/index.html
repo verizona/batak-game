@@ -65,7 +65,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:var(--font);backgro
 .tb-stats{display:flex;align-items:center;gap:8px}
 .tb-stat-box{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px 12px;font-size:14px;font-weight:800;color:#fff;display:flex;align-items:center;gap:5px}
 .tb-coin-ico{font-size:17px}
-.tb-trump-box{min-width:36px;height:36px;border-radius:8px;border:2px solid #cc3020;background:rgba(180,20,10,.4);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;color:#fff;padding:0 6px}
+.tb-trump-box{min-width:44px;height:44px;border-radius:10px;border:3px solid #ff2200;background:#cc0000;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#fff;padding:0 8px;box-shadow:0 0 10px rgba(255,0,0,.6)}
 
 /* Table area */
 #table-area{
@@ -127,6 +127,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:var(--font);backgro
 .badges-row{display:flex;gap:5px;align-items:center}
 /* Gift / chat circular buttons */
 .gift-btn{width:42px;height:42px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#3aaa3a,#186018);border:2px solid #4ade80;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-90px) scale(1.6)}}
+.gift-float{position:fixed;font-size:32px;pointer-events:none;animation:floatUp 1.4s ease-out forwards;z-index:9999}
 .chat-circle{width:50px;height:50px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#3aaa3a,#186018);border:2px solid #4ade80;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5);flex-shrink:0}
 /* North deck (stacked cards) */
 .deck-stack{position:relative;width:74px;height:104px}
@@ -346,7 +348,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:var(--font);backgro
         <div class="pname-sm" id="nm-w">-</div>
         <div class="pcoin"><span class="pcoin-icon">🪙</span><span class="pcoin-val" id="sc-w">0</span></div>
       </div>
-      <div class="gift-btn">🎁</div>
+      <div class="gift-btn" onclick="sendGift('w')">🎁</div>
       <div class="hand-side" id="hand-w"></div>
     </div>
 
@@ -360,7 +362,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:var(--font);backgro
         <div class="pname-sm" id="nm-e">-</div>
         <div class="pcoin"><span class="pcoin-icon">🪙</span><span class="pcoin-val" id="sc-e">0</span></div>
       </div>
-      <div class="gift-btn">🎁</div>
+      <div class="gift-btn" onclick="sendGift('e')">🎁</div>
       <div class="hand-side" id="hand-e"></div>
     </div>
 
@@ -388,7 +390,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:var(--font);backgro
             <div class="ptrick-badge" id="tr-s">0</div>
           </div>
         </div>
-        <div class="gift-btn">🎁</div>
+        <div class="gift-btn" onclick="sendGift('n')">🎁</div>
       </div>
     </div>
 
@@ -490,7 +492,7 @@ function initSock(cb){
   sock.on('room_state',(st)=>{players=st.players;if(st.mySeat!==undefined)mySeat=st.mySeat;renderWait(st);if(st.gameState&&document.getElementById('s-game').classList.contains('active'))applyState(st.gameState)});
   sock.on('game_started',({mode})=>{gMode=mode;document.getElementById('tb-title').textContent=ML[mode]||mode;clearTable();hideOverlays();show('s-game');setStatus('Kartlar dağıtılıyor...')});
   sock.on('round_started',({round})=>{document.getElementById('round-lbl').textContent='El '+round+' / 4';document.getElementById('tb-round').textContent=round+'/4';clearTable();hideOverlays();setStatus('Yeni el...')});
-  sock.on('bury_prompt',({extraCards})=>showBuryPanel(extraCards));
+  sock.on('bury_prompt',({hand,extraCards})=>showBuryPanel([...(hand||[]),...(extraCards||[])]));
   sock.on('buried',()=>{document.getElementById('o-bury').style.display='none';sysChat('Dağıtıcı gömdü.')});
   sock.on('bidding_started',({currentBidder,minBid})=>{const me=currentBidder===mySeat;if(me)showBidPanel(minBid||6,true);else document.getElementById('o-bid').style.display='none';setTurn(currentBidder);setStatus(me?'İhale sırası sizde!':pname(currentBidder)+' ihale yapıyor...')});
   sock.on('bid_placed',({seat,bid})=>sysChat(pname(seat)+': '+(bid==='PAS'?'PAS':bid)));
@@ -501,6 +503,7 @@ function initSock(cb){
   sock.on('trick_won',({winner,tricks,roundOver,scores,delta,made,gameOver})=>{flashWin(winner);sysChat(pname(winner)+' eli aldı ('+tricks[winner]+')');setTimeout(()=>{clearTrickArea();updateTricks(tricks);updateScores(scores);if(roundOver)showScore(scores,delta,made,tricks,gameOver);else{setTurn(winner);setStatus(winner===mySeat?'Sıra sizde!':pname(winner)+' oynuyor...')}},950)});
   sock.on('playing_started',({trump})=>{if(trump){const tp=document.getElementById('trump-pill');tp.style.display='inline';tp.textContent='Koz: '+S[trump]+' '+SN[trump];const tbt=document.getElementById('tb-trump');tbt.style.display='block';tbt.textContent=S[trump]+' '+SN[trump]}});
   sock.on('chat_message',({name,message})=>{if(name!==myName)addChat(name,message)});
+  sock.on('gift_received',({fromName,toSeat})=>{floatGift(toSeat,fromName)});
   sock.on('error',({msg})=>toast('⚠ '+msg,true));
 }
 
@@ -526,7 +529,7 @@ function applyState(gs){
   if(gs.currentTrick?.length)gs.currentTrick.forEach(t=>renderTrickCard(t.seatIndex,t.card));
   if(gs.state==='BIDDING'&&gs.currentBidder!==undefined){const me=gs.currentBidder===mySeat;if(me)showBidPanel(gs.highBid||6,true);setTurn(gs.currentBidder);setStatus(me?'İhale sırası sizde!':pname(gs.currentBidder)+' ihale yapıyor...')}
   else if(gs.state==='TRUMP_SELECTION'){if(gs.declarer===mySeat)document.getElementById('o-trump').style.display='flex';else setStatus(pname(gs.declarer)+' koz seçiyor...')}
-  else if(gs.state==='BURYING'){if(gs.dealer===mySeat&&gs.extraCards?.length)showBuryPanel(gs.extraCards);else setStatus('Dağıtıcı gömüyor...')}
+  else if(gs.state==='BURYING'){if(gs.dealer===mySeat&&gs.extraCards?.length)showBuryPanel([...(gs.hand||[]),...(gs.extraCards||[])]);else setStatus('Dağıtıcı gömüyor...')}
   else if(gs.state==='PLAYING'){const tl=gs.currentTrick?.length||0,ns=tl===0?gs.leadSeat:(gs.currentTrick[tl-1].seatIndex+1)%4;setTurn(ns);setStatus(ns===mySeat?'Sıra sizde!':pname(ns)+' oynuyor...')}
 }
 
@@ -685,6 +688,16 @@ function showScore(scores,delta,made,tricks,gameOver){
 }
 function nextRound(){document.getElementById('o-score').style.display='none';sock.emit('next_round')}
 function hideOverlays(){['o-bid','o-trump','o-bury','o-score'].forEach(id=>document.getElementById(id).style.display='none')}
+function sendGift(pos){if(!sock)return;sock.emit('send_gift',{toSeat:p2s(pos)});toast('🎁 Hediye gönderildi!')}
+function floatGift(toSeat,fromName){
+  const pos=s2p(toSeat);
+  const zone=document.getElementById('pz-'+pos);
+  const rect=zone?zone.getBoundingClientRect():{left:window.innerWidth/2,top:window.innerHeight/2,width:0,height:0};
+  const el=document.createElement('div');el.className='gift-float';el.textContent='🎁';
+  el.style.left=(rect.left+rect.width/2-16)+'px';el.style.top=(rect.top+rect.height/2)+'px';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1500);
+  toast(fromName+' hediye gönderdi! 🎁');
+}
 </script>
 </body>
 </html>

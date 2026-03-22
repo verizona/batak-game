@@ -67,10 +67,13 @@ class BatakGame {
     this.state = STATES.DEALING;
 
     if (this.mode === 'goemmeli') {
-      // Deal 13 cards each + 3 extra for dealer (52 - 52 = 0 remaining)
-      const hands = this.deck.deal(4, 13);
-      this.hands = hands;
+      // Draw 3 göm cards first, then dealer gets 13, others get 12 (total 3+13+12*3=52)
       this.extraCards = this.deck.draw(3);
+      const hands = {};
+      for (let i = 0; i < 4; i++) {
+        hands[i] = this.deck.draw(i === this.dealer ? 13 : 12);
+      }
+      this.hands = hands;
       this.state = STATES.BURYING;
       return { state: STATES.BURYING, dealer: this.dealer, extraCards: this.extraCards };
     } else if (this.mode === 'ihalesiz') {
@@ -103,7 +106,7 @@ class BatakGame {
 
     this.buriedCards = tobury;
     const newHand = allAvailable.filter(c => !cardIds.includes(c.id));
-    this.hands[seatIndex] = newHand.slice(0, 8);
+    this.hands[seatIndex] = newHand; // dealer now has 13 cards after burying 3 from 16
 
     const startBidder = (this.dealer + 1) % 4;
     this.biddingEngine = new BiddingEngine(4, startBidder);

@@ -328,6 +328,7 @@ io.on('connection', (socket) => {
       for (const [sid, p] of room.sockets) {
         if (p.seat === dealerSeat && !p.isAI) {
           io.to(sid).emit('bury_prompt', {
+            hand: room.game.hands[dealerSeat].map(c => ({ id: c.id, suit: c.suit, rank: c.rank })),
             extraCards: room.game.extraCards.map(c => ({ id: c.id, suit: c.suit, rank: c.rank }))
           });
         }
@@ -356,7 +357,7 @@ io.on('connection', (socket) => {
     if (!result.ok) { socket.emit('error', { msg: result.error }); return; }
 
     io.to(room.roomId).emit('buried', { dealer: player.seat });
-    io.to(room.roomId).emit('bidding_started', { currentBidder: result.currentBidder, minBid: 8 });
+    io.to(room.roomId).emit('bidding_started', { currentBidder: result.currentBidder, minBid: 7 });
     broadcastRoom(room);
     scheduleAIBid(room);
   });
@@ -420,13 +421,14 @@ io.on('connection', (socket) => {
       for (const [sid, p] of room.sockets) {
         if (p.seat === dealerSeat && !p.isAI) {
           io.to(sid).emit('bury_prompt', {
+            hand: room.game.hands[dealerSeat].map(c => ({ id: c.id, suit: c.suit, rank: c.rank })),
             extraCards: room.game.extraCards.map(c => ({ id: c.id, suit: c.suit, rank: c.rank }))
           });
         }
       }
       scheduleAIBury(room);
     } else if (roundResult.state === STATES.BIDDING) {
-      io.to(room.roomId).emit('bidding_started', { currentBidder: roundResult.currentBidder, minBid: 8 });
+      io.to(room.roomId).emit('bidding_started', { currentBidder: roundResult.currentBidder, minBid: 7 });
       scheduleAIBid(room);
     } else if (roundResult.state === STATES.PLAYING) {
       io.to(room.roomId).emit('playing_started', { trump: roundResult.trump });
@@ -445,6 +447,15 @@ io.on('connection', (socket) => {
       message: message.substring(0, 200),
       seat: player.seat
     });
+  });
+
+  socket.on('send_gift', ({ toSeat }) => {
+    const found = getRoomBySocket(socket.id);
+    if (!found) return;
+    const { room } = found;
+    const player = room.sockets.get(socket.id);
+    if (!player) return;
+    io.to(room.roomId).emit('gift_received', { fromName: player.name, toSeat });
   });
 
   socket.on('disconnect', () => {
